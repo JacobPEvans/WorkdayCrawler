@@ -143,7 +143,7 @@ class WorkdayCrawler(object):
         # pop unwanted info
         all_detail.pop('imageUrl')
         all_detail.pop('type')
-        all_detail.pop('description')
+        # all_detail.pop('description')
         return all_detail
 
     def save_to_file(self, content, company_name='wordday_jobs'):
