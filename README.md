@@ -4,10 +4,16 @@ parse workday job postings
 
 ## User Guide
 
-workday = WorkdayCrawler()
-workday.get_by_company('the company name')
+`pip install -r requirements.txt`
 
-workday.py has a default company (Cornell) for test run
+and then
+
+`python3 workday.py comapny_name`
+
+or
+
+`workday = WorkdayCrawler()`
+`workday.get_by_company('the company name')`
 
 The json output will be simililar to cornell.json:
 
