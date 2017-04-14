@@ -1,3 +1,4 @@
+import concurrent.futures
 import json
 import requests
 import sys
@@ -79,8 +80,21 @@ class WorkdayCrawler(object):
         base_url = url[:url.index('/', 10)]
 
         position_list = []
-        for position_url in position_url_list:
-            position_list.append(self.get_position_detail(base_url + position_url))
+
+        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+            funture_positions = []
+            for position_url in position_url_list:
+                complete_url = base_url + position_url
+                future_position = executor.submit(self.get_position_detail, complete_url)
+                funture_positions.append(future_position)
+
+        for future in concurrent.futures.as_completed(funture_positions):
+            try:
+                position = future.result()
+            except Exception as exc:
+                print (exc)
+            else:
+            	position_list.append(position)
 
         return position_list
 
