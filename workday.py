@@ -1,5 +1,6 @@
 import json
 import requests
+import sys
 import time
 
 from bs4 import BeautifulSoup
@@ -7,6 +8,7 @@ from selenium import webdriver
 
 HTML_PARSER = "html.parser"
 GOOGLE_URL = 'https://www.google.com/search?q=myworkdayjobs.com'
+
 
 class WorkdayCrawler(object):
 
@@ -24,7 +26,7 @@ class WorkdayCrawler(object):
                         break
 
             if not raw_url:
-            	print 'Company not found in workday'
+                print('Company not found in workday')
                 return
 
             position_list = self.hack_a_company(raw_url)
@@ -35,8 +37,8 @@ class WorkdayCrawler(object):
             self.save_to_file(json_output, company_name)
 
         else:
-            print response.status_code
-            print 'Unable to reach google'
+            print(response.status_code)
+            print('Unable to reach google')
 
     def is_googled_url_legit(self, url):
         return url and 'https' in url and 'myworkdayjobs.com' in url
@@ -65,8 +67,8 @@ class WorkdayCrawler(object):
             self.save_to_file(json_output)
 
         else:
-            print list_req.status_code
-            print 'Unable to reach google'
+            print (list_req.status_code)
+            print ('Unable to reach google')
 
     def hack_a_company(self, raw_url):
         # url: company's career landing page
@@ -80,7 +82,7 @@ class WorkdayCrawler(object):
         for position_url in position_url_list:
             position_list.append(self.get_position_detail(base_url + position_url))
 
-        return  position_list
+        return position_list
 
     # get list of positions from the company's career landing page
     def get_list_of_position_url(self, landing_page_url):
@@ -89,7 +91,7 @@ class WorkdayCrawler(object):
         browser = webdriver.PhantomJS(executable_path=r'/usr/local/bin/phantomjs')  
         browser.get(landing_page_url)
         # wait until the url change
-        time.sleep(8)
+        time.sleep(5)
         current_url = browser.current_url
         browser.close()
         
@@ -116,8 +118,11 @@ class WorkdayCrawler(object):
         url_list = []
         if count:
             url = url + '/' + str(count)
-        print url
+        print (url)
         response = requests.get(url, headers={"Accept":"application/json"})
+        if not response or response.status_code == requests.codes.not_found:
+            return url_list
+
         dict_response = json.loads(response.text)
         for first_child in dict_response.get('body').get('children'):
             if first_child.get('widget') == 'facetSearchResult':
@@ -136,21 +141,23 @@ class WorkdayCrawler(object):
         return url_list
 
     def get_position_detail(self, url):
-        print url
+        print (url)
         response = requests.get(url, headers={"Accept":"application/json"})
         dict_response = json.loads(response.text)
         all_detail = dict_response.get('openGraphAttributes')
         # pop unwanted info
         all_detail.pop('imageUrl')
         all_detail.pop('type')
-        # all_detail.pop('description')
+        all_detail.pop('description')
         return all_detail
 
     def save_to_file(self, content, company_name='wordday_jobs'):
-        f = open(company_name + '.json', 'w')
+        f = open(company_name + '.json', 'wb')
         f.write(content.encode('utf8'))
         f.close()
 
 if __name__ == '__main__':
+    companies = sys.argv[1:]
     workday = WorkdayCrawler()
-    workday.get_by_company('cornell')
+    for c in companies:
+        workday.get_by_company(c)
