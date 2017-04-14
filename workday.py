@@ -9,9 +9,11 @@ from selenium import webdriver
 
 HTML_PARSER = "html.parser"
 GOOGLE_URL = 'https://www.google.com/search?q=myworkdayjobs.com'
-
+NUM_OF_WORKERS = 5
+PhantomJS_driver_location = r'/usr/local/bin/phantomjs'
 
 class WorkdayCrawler(object):
+
 
     def get_by_company(self, company_name):
         response = requests.get(GOOGLE_URL + '+' + company_name)
@@ -23,8 +25,8 @@ class WorkdayCrawler(object):
             for company_link in workday_raw_urls:
                 temp = str(company_link.a['href'])
                 if self.is_googled_url_legit(temp):
-                        raw_url = temp
-                        break
+                    raw_url = temp # found!
+                    break
 
             if not raw_url:
                 print('Company not found in workday')
@@ -81,7 +83,7 @@ class WorkdayCrawler(object):
 
         position_list = []
 
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+        with concurrent.futures.ThreadPoolExecutor(max_workers=NUM_OF_WORKERS) as executor:
             funture_positions = []
             for position_url in position_url_list:
                 complete_url = base_url + position_url
@@ -102,7 +104,7 @@ class WorkdayCrawler(object):
     def get_list_of_position_url(self, landing_page_url):
         
         # PhantomJs - need to use your own phantom path
-        browser = webdriver.PhantomJS(executable_path=r'/usr/local/bin/phantomjs')  
+        browser = webdriver.PhantomJS(executable_path=PhantomJS_driver_location)  
         browser.get(landing_page_url)
         # wait until the url change
         time.sleep(5)
@@ -162,7 +164,7 @@ class WorkdayCrawler(object):
         # pop unwanted info
         all_detail.pop('imageUrl')
         all_detail.pop('type')
-        all_detail.pop('description')
+        #all_detail.pop('description')
         return all_detail
 
     def save_to_file(self, content, company_name='wordday_jobs'):
