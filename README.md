@@ -19,6 +19,10 @@ The json output will be simililar to cornell.json:
 
 {'cornell': [{'title': 'president', description:'So cool', 'url':'https://cornell.workdayjob.com......'}]}
 
+!! please remember to change the route of phantomJS to your own webdriver.
+https://github.com/iamgeorgelee/workday/blob/master/workday.py#L13
+Download: http://phantomjs.org/download.html
+
 ## How it works
 
 1. Search on Google with key words `myworkdayjobs.com` and the company name
